@@ -1,0 +1,59 @@
+{
+	"ecs7": true,
+	"runtimeVersion": "7",
+	"display": {
+		"title": "M1D HQ",
+		"description": "Enjoy the music, float the dance floor, checkout all Mr JSTickel's latest projects and have fun! Now, catch the sphere.",
+		"navmapThumbnail": "images/scene-thumbnail.png",
+		"favicon": "favicon_asset"
+	},
+	"owner": "MrJSTickel",
+	"contact": {
+		"name": "MrJSTickel",
+		"email": "metaOne@mrjstickel.com"
+	},
+	"main": "bin/game.js",
+	"tags": [],
+	"scene": {
+		"parcels": [
+			"106,50",
+			"107,50"
+		],
+		"base": "106,50"
+	},
+	"communications": {
+		"type": "webrtc",
+		"signalling": "https://signalling-01.decentraland.org"
+	},
+	"policy": {
+		"contentRating": "E",
+		"fly": true,
+		"voiceEnabled": false,
+		"blacklist": []
+	},
+	"spawnPoints": [
+		{
+			"name": "spawn1",
+			"default": true,
+			"position": {
+				"x": 32,
+				"y": 0,
+				"z": 8
+			},
+			"cameraTarget": {
+				"x": 30,
+				"y": 2,
+				"z": 4
+			}
+		}
+	],
+	"requiredPermissions": [
+		"ALLOW_TO_TRIGGER_AVATAR_EMOTE",
+		"ALLOW_TO_MOVE_PLAYER_INSIDE_SCENE"
+	],
+	"featureToggles": {
+		"voiceChat": "enabled",
+		"portableExperiences": "enabled"
+	}
+
+}
