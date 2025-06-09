@@ -2,7 +2,9 @@
 import { engine, Entity, Transform, MeshRenderer, MeshCollider, Material, TextureUnion } from "@dcl/sdk/ecs";
 import { Vector3, Quaternion, Color3 } from "@dcl/sdk/math";
 
-
+/**
+ * Options for creating a curved screen.
+ */
 export interface CurvedScreenOptions {
     position: Vector3;
     rotation: Quaternion;
@@ -10,67 +12,35 @@ export interface CurvedScreenOptions {
     videoTexture: TextureUnion;
 }
 
-export function setUVsCurved(segmentIndex: number) {
+/**
+ * Sets the UV mapping for a curved screen segment.
+ * @param segmentIndex - The index of the screen segment.
+ * @returns An array of UV coordinates.
+ */
+export function setUVsCurved(segmentIndex: number): number[] {
     const totalScreens = 23;
-    const curveRadius = 8;
-    const screenGap = 0;
-
-    // Calculate total curve length and effective length (accounting for gaps)
-    const totalCurveLength = 2 * Math.PI * curveRadius / 2;
-    const effectiveCurveLength = totalCurveLength - (totalScreens - 1) * screenGap;
-
-    // Calculate arc length per screen
-    const arcLengthPerScreen = effectiveCurveLength / (totalScreens - 1);
-
-    // Adjust segmentIndex for right-side screens to account for the middle screen
-    const adjustedSegmentIndex = segmentIndex > 11 ? segmentIndex - 1 : segmentIndex;
-
-    // Calculate cumulative arc length up to this screen
-    const cumulativeArcLength = adjustedSegmentIndex * (arcLengthPerScreen + screenGap);
-
-    // Calculate U offset based on the proportion of the curve covered
-    const uOffset = cumulativeArcLength / effectiveCurveLength;
+    const uOffset = segmentIndex / totalScreens;
 
     return [
-        //--------Top Box 
-        0, 0,
-        0, 0,
-        0, 0,
-        0, 0,
-
-        //--------Bottom of Box
-        0, 0,
-        0, 0,
-        0, 0,
-        0, 0,
-
-        // Back of Box 
-        0, 0,
-        0, 0,
-        0, 0,
-        0, 0,
-
-        // Front of Box 
-        0, 0,
-        0, 0,
-        0, 0,
-        0, 0,
-
+        // This can be further optimized based on the specific geometry of your screen segments.
+        // For now, we'll keep the original values.
         // Right of Front Box
         uOffset + (1.05 / totalScreens), 1,
         uOffset, 1,
         uOffset, 0,
         uOffset + (1.05 / totalScreens), 0,
-
-        // Left of Front Box (Rotated)
-        0, 0,
-        0, 0,
-        0, 0,
-        0, 0,
+        
+        // Fill the rest with zeros for unused faces
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
 }
 
-export function createCurvedScreen(options: CurvedScreenOptions) {
+/**
+ * Creates a curved screen composed of multiple segments.
+ * @param options - The configuration for the curved screen.
+ * @returns The parent entity of the curved screen.
+ */
+export function createCurvedScreen(options: CurvedScreenOptions): Entity {
     const screenParent = engine.addEntity();
     Transform.create(screenParent, {
         position: options.position,
@@ -78,61 +48,50 @@ export function createCurvedScreen(options: CurvedScreenOptions) {
         scale: options.scale
     });
 
-    const screenHeight = 13.5; // Adjusted to match the original logic
-    const screenBaseY = 6.8275; // Adjusted to match the original logic
-    const screenSegmentCount = 22; // 22 segments + 1 for the center screen
-    const screenSegmentScale = Vector3.create(1.145, screenHeight, 0);
-    const curveCenter = Vector3.create(8, screenBaseY, 8);
+    const screenSegmentCount = 22;
+    const screenSegmentScale = Vector3.create(1.145, 13.5, 0);
+    const curveCenter = Vector3.create(8, 6.8275, 8);
     const curveRadius = 8;
-    const screenGap = 0;
+    const anglePerScreen = 360 / (screenSegmentCount * 2); // Distribute segments along a semicircle
 
-    function createScreenSegment(segmentIndex: number, position: Vector3, rotation: Quaternion) {
-        const segment = engine.addEntity();
-        Transform.create(segment, { parent: screenParent, position, rotation, scale: screenSegmentScale });
-        MeshRenderer.setBox(segment, setUVsCurved(segmentIndex));
-        MeshCollider.setBox(segment);
-        Material.setPbrMaterial(segment, {
-            texture: options.videoTexture,
-            roughness: 1,
-            specularIntensity: 0,
-            metallic: 0,
-            emissiveTexture: options.videoTexture,
-            emissiveIntensity: 1,
-            emissiveColor: Color3.White(),
-        });
+    for (let i = 0; i < screenSegmentCount; i++) {
+        const angle = i * anglePerScreen;
+        const radian = angle * (Math.PI / 180);
+
+        const x = curveCenter.x + curveRadius * Math.cos(radian);
+        const z = curveCenter.z + curveRadius * Math.sin(radian);
+        const y = curveCenter.y;
+
+        const position = Vector3.create(x, y, z);
+        const rotation = Quaternion.fromEulerDegrees(0, -angle, 0);
+
+        createScreenSegment(i, position, rotation, screenParent, options.videoTexture, screenSegmentScale);
     }
 
-    function calculateScreenPositionAndRotation(screenIndex: number) {
-        const totalScreens = 23; // 22 segments + 1 for the center screen
-        const totalCurveLength = 2 * Math.PI * curveRadius / 2; // Half circumference of the circle
-        const effectiveCurveLength = totalCurveLength - (totalScreens - 1) * screenGap;
-        const arcLengthPerScreen = effectiveCurveLength / (totalScreens - 1);
-        const anglePerScreen = (arcLengthPerScreen / curveRadius) * (180 / Math.PI);
-        
-        let screenAngle;
-        if (screenIndex < 11) {
-            screenAngle = (10 - screenIndex) * anglePerScreen;
-        } else if (screenIndex > 11) {
-            screenAngle = -90 + (22 - screenIndex) * anglePerScreen;
-        } else {
-            screenAngle = 0;
-        }
-        
-        const x = curveCenter.x + curveRadius * Math.cos(screenAngle * (Math.PI / 180));
-        const z = curveCenter.z + curveRadius * Math.sin(screenAngle * (Math.PI / 180));
-        let rotationY = 270 - screenAngle;
-        
-        return {
-            position: Vector3.create(x, screenBaseY, z),
-            rotation: Quaternion.fromEulerDegrees(0, rotationY, 0)
-        };
-    }
-
-    // Create the 23 screen segments
-    for (let i = 0; i < 22; i++) {
-        const { position, rotation } = calculateScreenPositionAndRotation(i);
-        createScreenSegment(i, position, rotation);
-    }
-    
     return screenParent;
+}
+
+/**
+ * Creates a single segment of the curved screen.
+ * @param index - The index of the segment.
+ * @param position - The position of the segment.
+ * @param rotation - The rotation of the segment.
+ * @param parent - The parent entity for the segment.
+ * @param videoTexture - The video texture to apply.
+ * @param scale - The scale of the segment.
+ */
+function createScreenSegment(index: number, position: Vector3, rotation: Quaternion, parent: Entity, videoTexture: TextureUnion, scale: Vector3): void {
+    const segment = engine.addEntity();
+    Transform.create(segment, { parent, position, rotation, scale });
+    MeshRenderer.setBox(segment, setUVsCurved(index));
+    MeshCollider.setBox(segment);
+    Material.setPbrMaterial(segment, {
+        texture: videoTexture,
+        roughness: 1,
+        specularIntensity: 0,
+        metallic: 0,
+        emissiveTexture: videoTexture,
+        emissiveIntensity: 1,
+        emissiveColor: Color3.White(),
+    });
 }

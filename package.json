@@ -1,7 +1,9 @@
 {
-  "name": "dcl-project",
+  "name": "@iammrjstickel/m1d-dcl-components",
   "version": "1.0.0",
-  "description": "SDK7 Template scene",
+  "description": "A collection of Decentraland components, including a curved video screen.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "start": "sdk-commands start",
     "deploy": "sdk-commands deploy",
@@ -24,5 +26,15 @@
     "singleQuote": true,
     "printWidth": 120,
     "trailingComma": "none"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IamMrJStickel/M1D_DCL_Components.git"
+  },
+  "author": "MrJSTickel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/IamMrJStickel/M1D_DCL_Components/issues"
+  },
+  "homepage": "https://github.com/IamMrJStickel/M1D_DCL_Components#readme"
 }
