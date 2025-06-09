@@ -1,7 +1,7 @@
 {
-  "name": "@iammrjstickel/m1d-dcl-components",
+  "name": "@m1d/dcl-components",
   "version": "1.0.0",
-  "description": "A collection of Decentraland components, including a curved video screen.",
+  "description": "A collection of Decentraland components by M1D, including a curved video screen.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -16,6 +16,10 @@
     "@dcl/sdk": "latest",
     "typescript": "^4.8.4"
   },
-  "author": "MrJSTickel",
-  "license": "MIT"
+  "author": "M1D",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IamMrJStickel/M1D_DCL_Components.git"
+  }
 }
