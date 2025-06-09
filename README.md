@@ -4,9 +4,8 @@ A collection of reusable, high-quality components for Decentraland SDK 7 scenes,
 Installation
 To use these components in your Decentraland project, install the package from npm:
 
-Bash
-
 npm install @m1d/dcl-components
+
 Available Components
 Curved Screen
 This component creates a large, curved video screen composed of multiple segments. It is designed to display a single video texture seamlessly across its surface.
