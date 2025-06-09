@@ -1,5 +1,5 @@
 // src/curved-screen.ts
-import { engine, Entity, Transform, MeshRenderer, MeshCollider, Material, TextureUnion } from "@dcl/sdk/ecs";
+import { engine, Transform, MeshRenderer, MeshCollider, Material, TextureUnion } from "@dcl/sdk/ecs";
 import { Vector3, Quaternion, Color3 } from "@dcl/sdk/math";
 
 
@@ -12,24 +12,23 @@ export interface CurvedScreenOptions {
 
 export function setUVsCurved(segmentIndex: number) {
     const totalScreens = 23;
-    const curveRadius = 8;
-    const screenGap = 0;
+    // Shift the right half (segments 12-22) one section to the left in UV mapping
+    // The center segment is at index 11
+    let uStart: number, uEnd: number;
 
-    // Calculate total curve length and effective length (accounting for gaps)
-    const totalCurveLength = 2 * Math.PI * curveRadius / 2;
-    const effectiveCurveLength = totalCurveLength - (totalScreens - 1) * screenGap;
-
-    // Calculate arc length per screen
-    const arcLengthPerScreen = effectiveCurveLength / (totalScreens - 1);
-
-    // Adjust segmentIndex for right-side screens to account for the middle screen
-    const adjustedSegmentIndex = segmentIndex > 11 ? segmentIndex - 1 : segmentIndex;
-
-    // Calculate cumulative arc length up to this screen
-    const cumulativeArcLength = adjustedSegmentIndex * (arcLengthPerScreen + screenGap);
-
-    // Calculate U offset based on the proportion of the curve covered
-    const uOffset = cumulativeArcLength / effectiveCurveLength;
+    if (segmentIndex < 11) {
+        // Left half (0-10): normal mapping
+        uStart = segmentIndex / (totalScreens - 1);
+        uEnd = (segmentIndex + 1) / (totalScreens - 1);
+    } else if (segmentIndex === 11) {
+        // Center segment: its own mapping
+        uStart = segmentIndex / (totalScreens - 1);
+        uEnd = (segmentIndex + 1) / (totalScreens - 1);
+    } else {
+        // Right half (12-22): shift mapping one segment to the left
+        uStart = (segmentIndex - 1) / (totalScreens - 1);
+        uEnd = (segmentIndex) / (totalScreens - 1);
+    }
 
     return [
         //--------Top Box 
@@ -57,10 +56,10 @@ export function setUVsCurved(segmentIndex: number) {
         0, 0,
 
         // Right of Front Box
-        uOffset + (1.05 / totalScreens), 1,
-        uOffset, 1,
-        uOffset, 0,
-        uOffset + (1.05 / totalScreens), 0,
+        uEnd, 1,
+        uStart, 1,
+        uStart, 0,
+        uEnd, 0,
 
         // Left of Front Box (Rotated)
         0, 0,
@@ -85,7 +84,7 @@ export function createCurvedScreen(options: CurvedScreenOptions) {
     const curveCenter = Vector3.create(8, screenBaseY, 8);
     const curveRadius = 8;
     const screenGap = 0;
-
+    // const screenSegmentCount = 22; // 22 segments + 1 for the center screen
     function createScreenSegment(segmentIndex: number, position: Vector3, rotation: Quaternion) {
         const segment = engine.addEntity();
         Transform.create(segment, { parent: screenParent, position, rotation, scale: screenSegmentScale });
@@ -130,6 +129,11 @@ export function createCurvedScreen(options: CurvedScreenOptions) {
 
     // Create the 23 screen segments
     for (let i = 0; i < 22; i++) {
+        const { position, rotation } = calculateScreenPositionAndRotation(i);
+        createScreenSegment(i, position, rotation);
+    }
+    // Create the 23 screen segments
+    for (let i = 0; i < 23; i++) {
         const { position, rotation } = calculateScreenPositionAndRotation(i);
         createScreenSegment(i, position, rotation);
     }

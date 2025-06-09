@@ -1,4 +1,4 @@
-import { Entity, TextureUnion } from "@dcl/sdk/ecs";
+import { TextureUnion } from "@dcl/sdk/ecs";
 import { Vector3, Quaternion } from "@dcl/sdk/math";
 export interface CurvedScreenOptions {
     position: Vector3;
@@ -7,4 +7,4 @@ export interface CurvedScreenOptions {
     videoTexture: TextureUnion;
 }
 export declare function setUVsCurved(segmentIndex: number): number[];
-export declare function createCurvedScreen(options: CurvedScreenOptions): Entity;
+export declare function createCurvedScreen(options: CurvedScreenOptions): import("@dcl/sdk/ecs").Entity;

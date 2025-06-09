@@ -1,6 +1,6 @@
 {
   "name": "@m1d/dcl-components",
-  "version": "1.0.5",
+  "version": "1.0.9",
   "description": "A collection of Decentraland components by M1D, including a curved video screen.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
