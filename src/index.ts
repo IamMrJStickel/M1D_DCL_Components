@@ -1,11 +1,4 @@
-//index.ts
+// src/index.ts for m1d-dcl-components
 
-
-
-
-
-export function main() {
-
-
-
-}
+// Export the functions and components you want to make available to other projects
+export * from './curved-screen'
